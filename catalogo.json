@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "actualizado": "2026-09-13",
+  "peliculas": [
+    {
+      "id": "nova_demo_001",
+      "titulo": "PELÍCULA DE PRUEBA",
+      "tmdb_id": null,
+      "categorias": [
+        "✨ NOVATV"
+      ],
+      "url": "PON_AQUI_UNA_URL_DE_VIDEO_AUTORIZADA",
+      "portada": "",
+      "fondo": "",
+      "descripcion": "Entrada de prueba. Reemplaza la URL antes de activar el contenido."
+    }
+  ]
+}
