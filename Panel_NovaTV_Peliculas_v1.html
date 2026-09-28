@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>NovaTV · Panel privado de películas</title>
+  <style>
+    :root { color-scheme:dark; --bg:#0e0b14;--panel:#1b1526;--panel2:#241b33;--line:#48345f;--fg:#f6f0ff;--muted:#b8abc9;--accent:#a77bff;--accent2:#7240d9;--danger:#f0829a;--ok:#85dcaa }
+    *{box-sizing:border-box}html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{margin:0;background:radial-gradient(ellipse at top left,#221633 0%,var(--bg) 48%);min-height:100vh;color:var(--fg)}
+    main{max-width:1180px;margin:0 auto;padding:28px 18px 64px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(26px,4vw,38px);letter-spacing:.3px;margin-bottom:6px}h2{font-size:21px;margin-bottom:14px}h3{font-size:17px;margin:0}.muted{color:var(--muted)}.lead{margin-bottom:22px}.tag{display:inline-flex;padding:4px 10px;border:1px solid #8662bd;background:#291c3c;border-radius:999px;color:#dccdff;font-size:13px;margin-bottom:12px}
+    .card{border:1px solid var(--line);background:rgba(27,21,38,.96);border-radius:18px;padding:22px;box-shadow:0 10px 32px #0002}.stack{display:grid;gap:15px}.layout{display:grid;grid-template-columns:minmax(310px,.95fr) minmax(380px,1.25fr);gap:20px;align-items:start}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}label{display:block;font-weight:650;font-size:14px;margin-bottom:6px}.hint{font-size:12px;color:var(--muted);margin-top:5px}.field{min-width:0;flex:1}.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}input,textarea{width:100%;border:1px solid #5b466f;background:#100d17;border-radius:10px;padding:12px 13px;font:inherit;font-size:15px;color:var(--fg);outline:none}input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px #a77bff33}input::placeholder,textarea::placeholder{color:#9587a4}textarea{min-height:86px;resize:vertical}input[readonly]{opacity:.72}button{border:1px solid #634882;border-radius:10px;background:var(--panel2);color:var(--fg);padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}button:hover:not(:disabled){border-color:var(--accent);background:#332249}button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}.primary{background:var(--accent2);border-color:#ae86ff}.primary:hover:not(:disabled){background:#8755eb}.danger{color:#ffdce4;border-color:#b75b78}.tiny{font-size:13px;padding:7px 10px}.badge{background:#26382d;color:var(--ok);border-radius:999px;padding:4px 9px;font-size:12px;font-weight:750}.state{border-radius:10px;padding:12px 14px;border:1px solid var(--line);background:#291d3a;margin:12px 0;white-space:pre-wrap;line-height:1.4}.state.ok{background:#152b22;border-color:#3c7d59;color:#adf0c7}.state.err{background:#341c27;border-color:#98485c;color:#ffd6de}.note{border-left:3px solid var(--accent);padding:8px 12px;background:#2b203b;color:#dbcaec;border-radius:5px;font-size:13px}.film-list{display:grid;gap:10px;max-height:70vh;overflow:auto;padding-right:4px}.film{border:1px solid #4a365e;background:#171120;border-radius:12px;padding:13px}.film:hover{border-color:#7753a3}.film h3{overflow-wrap:anywhere}.film-meta{color:var(--muted);font-size:13px;margin:6px 0 12px}.hidden{display:none!important}.count{font-size:13px;color:#d5c2f3}.grow{flex:1}.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.spinner{width:14px;height:14px;border:2px solid #aaa2b8;border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:820px){.layout{grid-template-columns:1fr}.film-list{max-height:none}.fields2{grid-template-columns:1fr}.card{padding:18px}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="tag">✨ NOVATV · ADMINISTRACIÓN</span>
+    <h1>Panel privado de películas</h1>
+    <p class="muted lead">Agrega películas a Supabase y aparecerán en la app sin generar otro APK.</p>
+  </header>
+
+  <section id="loginPanel" class="card" style="max-width:620px" aria-labelledby="loginTitle">
+    <h2 id="loginTitle">Acceso de administrador</h2>
+    <p class="muted">Usa la <strong>cuenta administradora nueva</strong>, no el usuario técnico incluido en la app.</p>
+    <form id="loginForm" class="stack">
+      <div><label for="projectUrl">Proyecto Supabase</label><input id="projectUrl" readonly value="https://mktyemnpejqpmollyjiw.supabase.co"></div>
+      <div><label for="apiKey">Publishable Key de Supabase</label><input id="apiKey" type="password" autocomplete="off" spellcheck="false" required placeholder="sb_publishable_..."><div class="hint">Únicamente la clave pública <code>sb_publishable_...</code>. Nunca una Secret Key ni service_role.</div></div>
+      <div><label for="email">Correo del administrador</label><input id="email" type="email" autocomplete="username" required placeholder="admin@ejemplo.com"></div>
+      <div><label for="password">Contraseña del administrador</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <div class="row"><button class="primary" id="loginButton" type="submit">Entrar al panel</button><span id="loginBusy" class="hidden muted" aria-live="polite"><span class="spinner"></span> Conectando…</span></div>
+    </form>
+    <div id="loginStatus" role="status" aria-live="polite" class="state hidden"></div>
+    <p class="note" style="margin-top:16px;margin-bottom:0">Este panel no almacena tu contraseña ni tu sesión permanentemente. Al actualizar o cerrar la página, tendrás que iniciar sesión otra vez.</p>
+  </section>
+
+  <section id="adminPanel" class="hidden" aria-label="Gestión de películas">
+    <div class="card row between" style="margin-bottom:18px;padding:15px 20px">
+      <div><strong>Conectado a NovaTV</strong> <span class="badge">Supabase</span><div id="who" class="muted" style="font-size:13px;margin-top:4px"></div></div>
+      <div class="row"><button id="reloadButton" type="button">↻ Actualizar catálogo</button><button id="logoutButton" type="button">Cerrar sesión</button></div>
+    </div>
+    <div id="adminStatus" role="status" aria-live="polite" class="state hidden"></div>
+    <div class="layout">
+      <section class="card" aria-labelledby="editTitle">
+        <h2 id="editTitle">Agregar película</h2>
+        <p class="muted" style="font-size:14px">Con el TMDb ID, la app completa automáticamente las imágenes y otros metadatos que dejes vacíos.</p>
+        <form id="filmForm" class="stack">
+          <div><label for="title">Título *</label><input id="title" maxlength="200" required placeholder="Título de la película"></div>
+          <div class="fields2">
+            <div><label for="tmdb">TMDb ID</label><input id="tmdb" type="number" min="1" step="1" placeholder="Ej.: 1302904"><div class="hint">Solo el número. Opcional.</div></div>
+            <div><label for="categories">Categorías *</label><input id="categories" required value="✨ NOVATV"><div class="hint">Separa varias categorías con comas.</div></div>
+          </div>
+          <div>
+            <label for="videoUrl">URL directa del vídeo *</label>
+            <div class="row" style="flex-wrap:nowrap"><input id="videoUrl" type="password" required autocomplete="off" spellcheck="false" placeholder="https://.../video.mp4" class="grow"><button id="showUrlButton" class="tiny" type="button" aria-pressed="false">Mostrar</button></div>
+            <div class="hint">El enlace se oculta en pantalla; debe ser una URL de reproducción autorizada (MP4, MKV, HLS, etc.).</div>
+          </div>
+          <div><label for="poster">URL de portada (opcional)</label><input id="poster" type="url" placeholder="https://..."></div>
+          <div><label for="backdrop">URL de fondo (opcional)</label><input id="backdrop" type="url" placeholder="https://..."></div>
+          <div><label for="description">Descripción (opcional)</label><textarea id="description" placeholder="Deja vacío para usar la sinopsis de TMDb"></textarea></div>
+          <div class="row"><button class="primary" id="saveButton" type="submit">Agregar película</button><button id="cancelEditButton" class="hidden" type="button">Cancelar edición</button></div>
+        </form>
+        <p class="hint" style="margin-top:13px;margin-bottom:0">Añade únicamente películas que tengas derecho o autorización para distribuir.</p>
+      </section>
+      <section class="card" aria-labelledby="catalogTitle">
+        <div class="row between" style="margin-bottom:12px"><h2 id="catalogTitle" style="margin:0">Películas del catálogo</h2><span id="count" class="count"></span></div>
+        <label for="search" class="sr-only">Buscar por título</label><input id="search" placeholder="Buscar una película por título…" style="margin-bottom:14px">
+        <div id="filmList" class="film-list"><p class="muted">Conectando con el catálogo…</p></div>
+        <p class="hint" style="margin-top:12px;margin-bottom:0">Se muestran hasta 500 películas en esta primera versión. El servidor comprueba todos los permisos de escritura mediante RLS.</p>
+      </section>
+    </div>
+  </section>
+</main>
+<script>
+(() => {
+  'use strict';
+  const PROJECT_URL = 'https://mktyemnpejqpmollyjiw.supabase.co';
+  const TABLE_URL = PROJECT_URL + '/rest/v1/peliculas_novatv';
+  const $ = (id) => document.getElementById(id);
+  let key = '';
+  let session = null;
+  let catalog = [];
+  let editingId = null;
+  let busy = false;
+
+  function message(element, text, kind = '') {
+    element.textContent = text;
+    element.className = 'state ' + kind;
+    element.classList.toggle('hidden', !text);
+  }
+  function setBusy(value) {
+    busy = value;
+    $('loginButton').disabled = value;
+    $('saveButton').disabled = value;
+    $('reloadButton').disabled = value;
+    $('loginBusy').classList.toggle('hidden', !value || !!session);
+  }
+  function authError(error) {
+    if (error?.status === 401 || error?.status === 403) return 'Acceso denegado o sesión caducada. Comprueba que ingresaste con el usuario administrador.';
+    return error?.message || 'No se pudo completar la solicitud.';
+  }
+  async function responseJson(response) {
+    const body = await response.text();
+    let data = null;
+    try { data = body ? JSON.parse(body) : null; } catch (_) { /* texto del servidor */ }
+    if (!response.ok) {
+      const e = new Error(data?.msg || data?.message || data?.error_description || data?.error || `Error HTTP ${response.status}`);
+      e.status = response.status;
+      throw e;
+    }
+    return data;
+  }
+  async function login(event) {
+    event.preventDefault();
+    if (busy) return;
+    message($('loginStatus'), '');
+    const newKey = $('apiKey').value.trim();
+    if (!newKey.startsWith('sb_publishable_')) {
+      message($('loginStatus'), 'Pega únicamente la Publishable Key de Supabase (empieza con sb_publishable_).', 'err');
+      return;
+    }
+    setBusy(true);
+    try {
+      const response = await fetch(PROJECT_URL + '/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        headers: { 'apikey': newKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('email').value.trim(), password: $('password').value })
+      });
+      const data = await responseJson(response);
+      if (!data?.access_token || !data?.refresh_token) throw new Error('Supabase no devolvió una sesión válida.');
+      key = newKey;
+      session = {
+        token: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt: Date.now() + (Number(data.expires_in) || 3600) * 1000,
+        email: data.user?.email || $('email').value.trim()
+      };
+      $('password').value = '';
+      $('apiKey').value = '';
+      $('who').textContent = 'Sesión: ' + session.email;
+      $('loginPanel').classList.add('hidden');
+      $('adminPanel').classList.remove('hidden');
+      await loadCatalog();
+    } catch (e) {
+      if (session) {
+        message($('adminStatus'), authError(e), 'err');
+      } else {
+        message($('loginStatus'), authError(e), 'err');
+      }
+    } finally { setBusy(false); }
+  }
+  async function currentToken() {
+    if (!session) throw new Error('Inicia sesión de nuevo.');
+    if (Date.now() < session.expiresAt - 60000) return session.token;
+    const response = await fetch(PROJECT_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refreshToken })
+    });
+    const data = await responseJson(response);
+    if (!data?.access_token || !data?.refresh_token) throw new Error('No se pudo renovar la sesión. Vuelve a iniciar sesión.');
+    session.token = data.access_token;
+    session.refreshToken = data.refresh_token;
+    session.expiresAt = Date.now() + (Number(data.expires_in) || 3600) * 1000;
+    return session.token;
+  }
+  async function tableRequest(url, options = {}) {
+    const token = await currentToken();
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'apikey': key,
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/json',
+        ...(options.body ? { 'Content-Type': 'application/json', 'Prefer': 'return=representation' } : {}),
+        ...(options.headers || {})
+      }
+    });
+    return responseJson(response);
+  }
+  async function loadCatalog() {
+    const records = await tableRequest(TABLE_URL + '?select=id,titulo,tmdb_id,categorias,url,portada,fondo,descripcion,created_at&order=created_at.desc&limit=500');
+    catalog = Array.isArray(records) ? records : [];
+    renderCatalog();
+  }
+  function renderCatalog() {
+    const parent = $('filmList');
+    parent.replaceChildren();
+    const filter = $('search').value.trim().toLocaleLowerCase('es');
+    const matching = catalog.filter(p => String(p.titulo || '').toLocaleLowerCase('es').includes(filter));
+    $('count').textContent = `${catalog.length} película${catalog.length === 1 ? '' : 's'}`;
+    if (!matching.length) {
+      const p = document.createElement('p'); p.className = 'muted';
+      p.textContent = filter ? 'No se encontraron películas.' : 'El catálogo está vacío. Agrega la primera película.';
+      parent.append(p); return;
+    }
+    for (const item of matching) {
+      const article = document.createElement('article'); article.className = 'film';
+      const heading = document.createElement('h3'); heading.textContent = item.titulo || 'Sin título';
+      const meta = document.createElement('div'); meta.className = 'film-meta';
+      const cats = Array.isArray(item.categorias) ? item.categorias.join(' · ') : '';
+      meta.textContent = `TMDb: ${item.tmdb_id ?? 'sin ID'} · ${cats || 'Sin categoría'}`;
+      const row = document.createElement('div'); row.className = 'row';
+      const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'tiny'; edit.textContent = 'Editar';
+      edit.addEventListener('click', () => editFilm(item));
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'tiny danger'; del.textContent = 'Eliminar';
+      del.addEventListener('click', () => deleteFilm(item));
+      row.append(edit, del); article.append(heading, meta, row); parent.append(article);
+    }
+  }
+  function clearForm() {
+    editingId = null;
+    $('filmForm').reset();
+    $('categories').value = '✨ NOVATV';
+    $('videoUrl').type = 'password';
+    $('showUrlButton').textContent = 'Mostrar';
+    $('showUrlButton').setAttribute('aria-pressed', 'false');
+    $('editTitle').textContent = 'Agregar película';
+    $('saveButton').textContent = 'Agregar película';
+    $('cancelEditButton').classList.add('hidden');
+  }
+  function editFilm(item) {
+    editingId = String(item.id);
+    $('title').value = item.titulo || '';
+    $('tmdb').value = item.tmdb_id ?? '';
+    $('categories').value = Array.isArray(item.categorias) ? item.categorias.join(', ') : '✨ NOVATV';
+    $('videoUrl').value = item.url || '';
+    $('poster').value = item.portada || '';
+    $('backdrop').value = item.fondo || '';
+    $('description').value = item.descripcion || '';
+    $('videoUrl').type = 'password';
+    $('showUrlButton').textContent = 'Mostrar';
+    $('showUrlButton').setAttribute('aria-pressed', 'false');
+    $('editTitle').textContent = 'Editar película';
+    $('saveButton').textContent = 'Guardar cambios';
+    $('cancelEditButton').classList.remove('hidden');
+    message($('adminStatus'), 'Editando: ' + (item.titulo || 'Película'));
+    $('filmForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function optionalHttpUrl(value, label) {
+    if (!value.trim()) return '';
+    let parsed;
+    try { parsed = new URL(value.trim()); } catch (_) { throw new Error('La URL de ' + label + ' no es válida.'); }
+    if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error('La URL de ' + label + ' debe usar HTTP o HTTPS.');
+    return value.trim();
+  }
+  function filmPayload() {
+    const titulo = $('title').value.trim();
+    if (!titulo) throw new Error('Escribe el título.');
+    const url = optionalHttpUrl($('videoUrl').value, 'vídeo');
+    if (!url) throw new Error('Pega la URL directa del vídeo.');
+    const cats = [...new Set($('categories').value.split(',').map(s => s.trim()).filter(Boolean))];
+    if (!cats.length) throw new Error('Indica al menos una categoría.');
+    if (!cats.includes('✨ NOVATV')) cats.unshift('✨ NOVATV');
+    const tmdbValue = $('tmdb').value.trim();
+    const tmdbId = tmdbValue === '' ? null : Number(tmdbValue);
+    if (tmdbId !== null && (!Number.isSafeInteger(tmdbId) || tmdbId <= 0)) throw new Error('El TMDb ID debe ser un número entero positivo.');
+    return {
+      titulo, tmdb_id: tmdbId, categorias: cats, url,
+      portada: optionalHttpUrl($('poster').value, 'portada'),
+      fondo: optionalHttpUrl($('backdrop').value, 'fondo'),
+      descripcion: $('description').value.trim()
+    };
+  }
+  async function saveFilm(event) {
+    event.preventDefault();
+    if (busy) return;
+    message($('adminStatus'), '');
+    let payload;
+    try { payload = filmPayload(); } catch(e) { message($('adminStatus'), e.message, 'err'); return; }
+    const isEdit = editingId !== null;
+    const previousId = editingId;
+    setBusy(true);
+    try {
+      const url = isEdit ? TABLE_URL + '?id=eq.' + encodeURIComponent(previousId) : TABLE_URL;
+      const records = await tableRequest(url, { method: isEdit ? 'PATCH' : 'POST', body: JSON.stringify(payload) });
+      if (!Array.isArray(records) || records.length !== 1) throw new Error('El servidor no confirmó el cambio. Comprueba los permisos del usuario administrador.');
+      clearForm();
+      await loadCatalog();
+      message($('adminStatus'), isEdit ? 'Película actualizada correctamente.' : 'Película agregada correctamente. Abre ✨ NOVATV en la app para verla.', 'ok');
+    } catch(e) { message($('adminStatus'), authError(e), 'err'); }
+    finally { setBusy(false); }
+  }
+  async function deleteFilm(item) {
+    if (busy) return;
+    if (!confirm('¿Eliminar «' + (item.titulo || 'esta película') + '» del catálogo NovaTV?')) return;
+    setBusy(true);
+    try {
+      const records = await tableRequest(TABLE_URL + '?id=eq.' + encodeURIComponent(String(item.id)), {
+        method: 'DELETE', headers: { 'Prefer': 'return=representation' }
+      });
+      if (!Array.isArray(records) || records.length !== 1) throw new Error('El servidor no confirmó la eliminación. Comprueba los permisos.');
+      if (editingId === String(item.id)) clearForm();
+      await loadCatalog();
+      message($('adminStatus'), 'Película eliminada del catálogo.', 'ok');
+    } catch(e) { message($('adminStatus'), authError(e), 'err'); }
+    finally { setBusy(false); }
+  }
+  async function logout() {
+    const previousToken = session?.token;
+    session = null;
+    key = '';
+    catalog = [];
+    editingId = null;
+    $('filmList').replaceChildren();
+    $('adminPanel').classList.add('hidden');
+    $('loginPanel').classList.remove('hidden');
+    $('email').value = '';
+    $('password').value = '';
+    $('apiKey').value = '';
+    message($('adminStatus'), '');
+    message($('loginStatus'), 'Sesión cerrada.', 'ok');
+    clearForm();
+    // Al estar token y refresh token solo en memoria, no persisten al cerrar la página.
+    // La revocación en servidor no es indispensable para cerrar la sesión local.
+    void previousToken;
+  }
+  $('loginForm').addEventListener('submit', login);
+  $('filmForm').addEventListener('submit', saveFilm);
+  $('cancelEditButton').addEventListener('click', () => { clearForm(); message($('adminStatus'), 'Edición cancelada.'); });
+  $('logoutButton').addEventListener('click', logout);
+  $('search').addEventListener('input', renderCatalog);
+  $('reloadButton').addEventListener('click', async () => {
+    if (busy) return;
+    setBusy(true);
+    try { await loadCatalog(); message($('adminStatus'), 'Catálogo actualizado.', 'ok'); }
+    catch (e) { message($('adminStatus'), authError(e), 'err'); }
+    finally { setBusy(false); }
+  });
+  $('showUrlButton').addEventListener('click', () => {
+    const shown = $('videoUrl').type === 'password';
+    $('videoUrl').type = shown ? 'url' : 'password';
+    $('showUrlButton').textContent = shown ? 'Ocultar' : 'Mostrar';
+    $('showUrlButton').setAttribute('aria-pressed', String(shown));
+  });
+})();
+</script>
+</body>
+</html>
