@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>NovaTV · Panel privado de series</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0e0b14;--panel:#1b1526;--panel2:#241b33;--line:#48345f;--fg:#f6f0ff;--muted:#b8abc9;--accent:#a77bff;--accent2:#7240d9;--danger:#f0829a;--ok:#85dcaa}
+    *{box-sizing:border-box}html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{margin:0;background:radial-gradient(ellipse at top left,#221633 0%,var(--bg) 48%);min-height:100vh;color:var(--fg)}
+    main{max-width:1200px;margin:0 auto;padding:28px 18px 64px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(26px,4vw,38px);margin-bottom:6px}h2{font-size:21px;margin-bottom:14px}h3{font-size:17px;margin:0}.muted{color:var(--muted)}.lead{margin-bottom:22px}.tag{display:inline-flex;padding:4px 10px;border:1px solid #8662bd;background:#291c3c;border-radius:999px;color:#dccdff;font-size:13px;margin-bottom:12px}
+    .card{border:1px solid var(--line);background:rgba(27,21,38,.96);border-radius:18px;padding:22px;box-shadow:0 10px 32px #0002}.stack{display:grid;gap:15px}.layout{display:grid;grid-template-columns:minmax(310px,.95fr) minmax(380px,1.25fr);gap:20px;align-items:start}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}label{display:block;font-weight:650;font-size:14px;margin-bottom:6px}.hint{font-size:12px;color:var(--muted);margin-top:5px}.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}input,textarea,select{width:100%;border:1px solid #5b466f;background:#100d17;border-radius:10px;padding:12px 13px;font:inherit;font-size:15px;color:var(--fg);outline:none}input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #a77bff33}input::placeholder,textarea::placeholder{color:#9587a4}textarea{min-height:86px;resize:vertical}input[readonly]{opacity:.72}select{background-color:#100d17}
+    button{border:1px solid #634882;border-radius:10px;background:var(--panel2);color:var(--fg);padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}button:hover:not(:disabled){border-color:var(--accent);background:#332249}button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}.primary{background:var(--accent2);border-color:#ae86ff}.primary:hover:not(:disabled){background:#8755eb}.danger{color:#ffdce4;border-color:#b75b78}.tiny{font-size:13px;padding:7px 10px}.badge{background:#26382d;color:var(--ok);border-radius:999px;padding:4px 9px;font-size:12px;font-weight:750}.state{border-radius:10px;padding:12px 14px;border:1px solid var(--line);background:#291d3a;margin:12px 0;white-space:pre-wrap;line-height:1.4}.state.ok{background:#152b22;border-color:#3c7d59;color:#adf0c7}.state.err{background:#341c27;border-color:#98485c;color:#ffd6de}.note{border-left:3px solid var(--accent);padding:8px 12px;background:#2b203b;color:#dbcaec;border-radius:5px;font-size:13px}.records{display:grid;gap:10px;max-height:70vh;overflow:auto;padding-right:4px}.record{border:1px solid #4a365e;background:#171120;border-radius:12px;padding:13px}.record:hover{border-color:#7753a3}.record h3{overflow-wrap:anywhere}.record-meta{color:var(--muted);font-size:13px;margin:6px 0 12px;overflow-wrap:anywhere}.hidden{display:none!important}.count{font-size:13px;color:#d5c2f3}.grow{flex:1;min-width:0}.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.spinner{width:14px;height:14px;border:2px solid #aaa2b8;border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:17px 0}.tabs button{border-radius:999px;padding:10px 16px}.tabs button[aria-selected="true"]{background:var(--accent2);border-color:#ae86ff;color:white}.step{display:inline-block;border:1px solid #725498;color:#e3d3fa;border-radius:8px;padding:4px 9px;margin-right:6px;font-size:13px;font-weight:700}.mini{font-size:13px}.urlrow{flex-wrap:nowrap}.urlrow button{white-space:nowrap}.widehint{margin-top:12px}
+    @media(max-width:820px){.layout{grid-template-columns:1fr}.records{max-height:none}.fields2{grid-template-columns:1fr}.card{padding:18px}.tabs button{flex:1}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="tag">✨ NOVATV · ADMINISTRACIÓN</span>
+    <h1>Panel privado de series</h1>
+    <p class="muted lead">Organiza tus series, temporadas y episodios desde Supabase, sin modificar el panel de Películas.</p>
+  </header>
+
+  <section id="loginPanel" class="card" style="max-width:620px" aria-labelledby="loginTitle">
+    <h2 id="loginTitle">Acceso de administrador</h2>
+    <p class="muted">Usa la <strong>cuenta administradora</strong> del panel, no la cuenta técnica de la app.</p>
+    <form id="loginForm" class="stack">
+      <div><label for="projectUrl">Proyecto Supabase</label><input id="projectUrl" readonly value="https://mktyemnpejqpmollyjiw.supabase.co"></div>
+      <div><label for="apiKey">Publishable Key de Supabase</label><input id="apiKey" type="password" autocomplete="off" spellcheck="false" required placeholder="sb_publishable_..."><div class="hint">Únicamente la clave pública. Nunca uses una Secret Key ni service_role.</div></div>
+      <div><label for="email">Correo del administrador</label><input id="email" type="email" autocomplete="username" required></div>
+      <div><label for="password">Contraseña del administrador</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <div class="row"><button class="primary" id="loginButton" type="submit">Entrar al panel</button><span id="loginBusy" class="hidden muted" aria-live="polite"><span class="spinner"></span> Conectando…</span></div>
+    </form>
+    <div id="loginStatus" role="status" aria-live="polite" class="state hidden"></div>
+    <p class="note" style="margin-top:16px;margin-bottom:0">La contraseña y la sesión solo se mantienen en la memoria de esta página. Al cerrarla tendrás que iniciar sesión de nuevo.</p>
+  </section>
+
+  <section id="adminPanel" class="hidden" aria-label="Gestión de series">
+    <div class="card row between" style="margin-bottom:16px;padding:15px 20px">
+      <div><strong>Conectado a NovaTV</strong> <span class="badge">Supabase</span><div id="who" class="muted mini" style="margin-top:4px"></div></div>
+      <div class="row"><button id="reloadButton" type="button">↻ Actualizar</button><button id="logoutButton" type="button">Cerrar sesión</button></div>
+    </div>
+    <p class="note" style="margin:0">Orden de trabajo: <span class="step">1 · Serie</span><span class="step">2 · Temporada</span><span class="step">3 · Episodio</span> La app Android todavía no muestra estas series; la integración llegará después de probar el panel.</p>
+    <nav class="tabs" aria-label="Secciones del catálogo de series">
+      <button type="button" data-tab="series" aria-selected="true">1 · Series <span id="seriesCountTab"></span></button>
+      <button type="button" data-tab="seasons" aria-selected="false">2 · Temporadas <span id="seasonsCountTab"></span></button>
+      <button type="button" data-tab="episodes" aria-selected="false">3 · Episodios <span id="episodesCountTab"></span></button>
+    </nav>
+    <div id="adminStatus" role="status" aria-live="polite" class="state hidden"></div>
+
+    <section id="seriesTab" class="layout" aria-label="Series">
+      <div class="card">
+        <h2 id="seriesFormTitle">Agregar serie</h2>
+        <p class="muted mini">Con el TMDb ID podremos completar automáticamente datos en la app cuando integremos las series.</p>
+        <form id="seriesForm" class="stack">
+          <div><label for="seriesTitle">Título *</label><input id="seriesTitle" maxlength="200" required placeholder="Título de la serie"></div>
+          <div class="fields2">
+            <div><label for="seriesTmdb">TMDb ID</label><input id="seriesTmdb" type="number" min="1" step="1" placeholder="Opcional"></div>
+            <div><label for="seriesCategories">Categorías *</label><input id="seriesCategories" required value="✨ NOVATV"><div class="hint">Separa varias con comas.</div></div>
+          </div>
+          <div><label for="seriesPoster">URL de portada (opcional)</label><input id="seriesPoster" type="url" placeholder="https://..."></div>
+          <div><label for="seriesBackdrop">URL de fondo (opcional)</label><input id="seriesBackdrop" type="url" placeholder="https://..."></div>
+          <div><label for="seriesDescription">Descripción (opcional)</label><textarea id="seriesDescription" placeholder="Sinopsis de la serie"></textarea></div>
+          <div class="row"><button class="primary" id="seriesSave" type="submit">Agregar serie</button><button id="seriesCancel" class="hidden" type="button">Cancelar edición</button></div>
+        </form>
+        <p class="hint widehint">Primero crea la serie. Después entra en «Temporadas» para añadir sus capítulos.</p>
+      </div>
+      <div class="card">
+        <div class="row between" style="margin-bottom:12px"><h2 style="margin:0">Series del catálogo</h2><span id="seriesCount" class="count"></span></div>
+        <label for="seriesSearch" class="sr-only">Buscar serie</label><input id="seriesSearch" placeholder="Buscar por título…" style="margin-bottom:14px">
+        <div id="seriesList" class="records"><p class="muted">Cargando…</p></div>
+      </div>
+    </section>
+
+    <section id="seasonsTab" class="layout hidden" aria-label="Temporadas">
+      <div class="card">
+        <h2 id="seasonsFormTitle">Agregar temporada</h2>
+        <p class="muted mini">Cada temporada pertenece a una serie que ya hayas creado.</p>
+        <form id="seasonsForm" class="stack">
+          <div><label for="seasonSeries">Serie *</label><select id="seasonSeries" required></select></div>
+          <div class="fields2">
+            <div><label for="seasonNumber">Número de temporada *</label><input id="seasonNumber" type="number" min="0" step="1" required placeholder="Ej.: 1"><div class="hint">Usa 0 solo para especiales.</div></div>
+            <div><label for="seasonTitle">Título (opcional)</label><input id="seasonTitle" maxlength="200" placeholder="Temporada 1"></div>
+          </div>
+          <div class="row"><button class="primary" id="seasonsSave" type="submit">Agregar temporada</button><button id="seasonsCancel" class="hidden" type="button">Cancelar edición</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="row between" style="margin-bottom:12px"><h2 style="margin:0">Temporadas</h2><span id="seasonsCount" class="count"></span></div>
+        <div id="seasonsList" class="records"></div>
+      </div>
+    </section>
+
+    <section id="episodesTab" class="layout hidden" aria-label="Episodios">
+      <div class="card">
+        <h2 id="episodesFormTitle">Agregar episodio</h2>
+        <p class="muted mini">Cada episodio pertenece a una temporada y tiene su propia URL de reproducción.</p>
+        <form id="episodesForm" class="stack">
+          <div><label for="episodeSeason">Temporada *</label><select id="episodeSeason" required></select></div>
+          <div class="fields2">
+            <div><label for="episodeNumber">Número de episodio *</label><input id="episodeNumber" type="number" min="1" step="1" required placeholder="Ej.: 1"></div>
+            <div><label for="episodeTitle">Título (opcional)</label><input id="episodeTitle" maxlength="200" placeholder="Episodio 1"></div>
+          </div>
+          <div>
+            <label for="episodeUrl">URL directa del vídeo *</label>
+            <div class="row urlrow"><input id="episodeUrl" class="grow" type="password" required spellcheck="false" autocomplete="off" placeholder="https://.../episodio.mp4"><button id="episodeShowUrl" type="button" class="tiny" aria-pressed="false">Mostrar</button></div>
+            <div class="hint">URL de contenido autorizado; no una página con un reproductor incrustado.</div>
+          </div>
+          <div><label for="episodePoster">URL de imagen (opcional)</label><input id="episodePoster" type="url" placeholder="https://..."></div>
+          <div><label for="episodeDescription">Descripción (opcional)</label><textarea id="episodeDescription"></textarea></div>
+          <div class="row"><button class="primary" id="episodesSave" type="submit">Agregar episodio</button><button id="episodesCancel" class="hidden" type="button">Cancelar edición</button></div>
+        </form>
+        <p class="hint widehint">Añade únicamente episodios que tengas autorización para distribuir.</p>
+      </div>
+      <div class="card">
+        <div class="row between" style="margin-bottom:12px"><h2 style="margin:0">Episodios</h2><span id="episodesCount" class="count"></span></div>
+        <div id="episodesList" class="records"></div>
+      </div>
+    </section>
+    <p class="hint" style="margin-top:16px">Se muestran hasta 500 elementos de cada tabla en esta primera versión. Supabase comprueba los permisos mediante RLS. Eliminar una serie también elimina sus temporadas y episodios; eliminar una temporada elimina sus episodios.</p>
+  </section>
+</main>
+<script>
+(() => {
+  'use strict';
+  const PROJECT_URL = 'https://mktyemnpejqpmollyjiw.supabase.co';
+  const ENDPOINTS = {
+    series: PROJECT_URL + '/rest/v1/series_novatv',
+    seasons: PROJECT_URL + '/rest/v1/temporadas_novatv',
+    episodes: PROJECT_URL + '/rest/v1/episodios_novatv'
+  };
+  const $ = (id) => document.getElementById(id);
+  let key = '';
+  let session = null;
+  let busy = false;
+  let activeTab = 'series';
+  let series = [], seasons = [], episodes = [];
+  let editingSeries = null, editingSeason = null, editingEpisode = null;
+
+  function message(element, text, kind = '') {
+    element.textContent = text;
+    element.className = 'state ' + kind;
+    element.classList.toggle('hidden', !text);
+  }
+  function setBusy(value) {
+    busy = value;
+    for (const id of ['loginButton', 'reloadButton', 'seriesSave', 'seasonsSave', 'episodesSave']) $(id).disabled = value;
+    $('loginBusy').classList.toggle('hidden', !value || !!session);
+  }
+  function readableError(error) {
+    if (error?.status === 401 || error?.status === 403) return 'Acceso denegado o sesión caducada. Usa la cuenta administradora.';
+    if (error?.code === '23505') return 'Ese número ya existe dentro de la misma serie o temporada.';
+    if (error?.code === '23503') return 'La serie o temporada seleccionada ya no existe. Pulsa Actualizar.';
+    return error?.message || 'No se pudo completar la solicitud.';
+  }
+  async function responseJson(response) {
+    const body = await response.text();
+    let data = null;
+    try { data = body ? JSON.parse(body) : null; } catch (_) { /* Respuesta no JSON */ }
+    if (!response.ok) {
+      const error = new Error(data?.message || data?.msg || data?.error_description || data?.error || `Error HTTP ${response.status}`);
+      error.status = response.status;
+      error.code = data?.code;
+      throw error;
+    }
+    return data;
+  }
+  async function login(event) {
+    event.preventDefault();
+    if (busy) return;
+    message($('loginStatus'), '');
+    const newKey = $('apiKey').value.trim();
+    if (!newKey.startsWith('sb_publishable_')) {
+      message($('loginStatus'), 'Usa únicamente la Publishable Key de Supabase (empieza con sb_publishable_).', 'err');
+      return;
+    }
+    setBusy(true);
+    try {
+      const response = await fetch(PROJECT_URL + '/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        headers: { 'apikey': newKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('email').value.trim(), password: $('password').value })
+      });
+      const data = await responseJson(response);
+      if (!data?.access_token || !data?.refresh_token) throw new Error('Supabase no devolvió una sesión válida.');
+      key = newKey;
+      session = {
+        token: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt: Date.now() + (Number(data.expires_in) || 3600) * 1000,
+        email: data.user?.email || $('email').value.trim()
+      };
+      $('password').value = '';
+      $('apiKey').value = '';
+      $('who').textContent = 'Sesión: ' + session.email;
+      $('loginPanel').classList.add('hidden');
+      $('adminPanel').classList.remove('hidden');
+      try {
+        await loadAll();
+      } catch (error) {
+        message($('adminStatus'), readableError(error), 'err');
+      }
+    } catch (error) {
+      message($('loginStatus'), readableError(error), 'err');
+    } finally { setBusy(false); }
+  }
+  async function currentToken() {
+    if (!session) throw new Error('Inicia sesión de nuevo.');
+    if (Date.now() < session.expiresAt - 60000) return session.token;
+    const response = await fetch(PROJECT_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refreshToken })
+    });
+    const data = await responseJson(response);
+    if (!data?.access_token || !data?.refresh_token) throw new Error('No se pudo renovar la sesión. Vuelve a iniciar sesión.');
+    session.token = data.access_token;
+    session.refreshToken = data.refresh_token;
+    session.expiresAt = Date.now() + (Number(data.expires_in) || 3600) * 1000;
+    return session.token;
+  }
+  async function request(url, options = {}) {
+    const token = await currentToken();
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        apikey: key,
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/json',
+        ...(options.body ? { 'Content-Type': 'application/json', Prefer: 'return=representation' } : {}),
+        ...(options.headers || {})
+      }
+    });
+    return responseJson(response);
+  }
+  function option(value, label) {
+    const element = document.createElement('option');
+    element.value = String(value);
+    element.textContent = label;
+    return element;
+  }
+  function seriesName(id) { return series.find(row => String(row.id) === String(id))?.titulo || `Serie ${id}`; }
+  function seasonName(id) {
+    const season = seasons.find(row => String(row.id) === String(id));
+    return season ? `${seriesName(season.serie_id)} · Temp. ${season.numero}${season.titulo ? ' · ' + season.titulo : ''}` : `Temporada ${id}`;
+  }
+  function refreshParents() {
+    const s = $('seasonSeries').value;
+    $('seasonSeries').replaceChildren(option('', 'Selecciona una serie…'));
+    for (const seriesItem of series) $('seasonSeries').append(option(seriesItem.id, seriesItem.titulo));
+    if (series.some(row => String(row.id) === s)) $('seasonSeries').value = s;
+
+    const e = $('episodeSeason').value;
+    $('episodeSeason').replaceChildren(option('', 'Selecciona una temporada…'));
+    for (const seasonItem of seasons) $('episodeSeason').append(option(seasonItem.id, seasonName(seasonItem.id)));
+    if (seasons.some(row => String(row.id) === e)) $('episodeSeason').value = e;
+  }
+  async function loadAll() {
+    // Las tres tablas se consultan por separado para respetar sus políticas RLS.
+    const [allSeries, allSeasons, allEpisodes] = await Promise.all([
+      request(ENDPOINTS.series + '?select=id,titulo,tmdb_id,categorias,portada,fondo,descripcion,created_at&order=created_at.desc&limit=500'),
+      request(ENDPOINTS.seasons + '?select=id,serie_id,numero,titulo,created_at&order=created_at.desc&limit=500'),
+      request(ENDPOINTS.episodes + '?select=id,temporada_id,numero,titulo,url,portada,descripcion,created_at&order=created_at.desc&limit=500')
+    ]);
+    series = Array.isArray(allSeries) ? allSeries : [];
+    seasons = Array.isArray(allSeasons) ? allSeasons : [];
+    episodes = Array.isArray(allEpisodes) ? allEpisodes : [];
+    refreshParents();
+    renderSeries(); renderSeasons(); renderEpisodes();
+  }
+  function switchTab(tab) {
+    if (busy || !['series','seasons','episodes'].includes(tab)) return;
+    activeTab = tab;
+    for (const name of ['series','seasons','episodes']) {
+      $(name + 'Tab').classList.toggle('hidden', name !== tab);
+      document.querySelector(`[data-tab="${name}"]`).setAttribute('aria-selected', String(name === tab));
+    }
+    message($('adminStatus'), '');
+  }
+  function makeRecord(title, meta, actions) {
+    const article = document.createElement('article'); article.className = 'record';
+    const heading = document.createElement('h3'); heading.textContent = title;
+    const details = document.createElement('div'); details.className = 'record-meta'; details.textContent = meta;
+    const row = document.createElement('div'); row.className = 'row';
+    for (const [label, action, css = ''] of actions) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'tiny ' + css; button.textContent = label;
+      button.addEventListener('click', action); row.append(button);
+    }
+    article.append(heading, details, row);
+    return article;
+  }
+  function emptyList(container, text) {
+    const p = document.createElement('p'); p.className = 'muted'; p.textContent = text;
+    container.append(p);
+  }
+  function renderSeries() {
+    const list = $('seriesList'); list.replaceChildren();
+    const filter = $('seriesSearch').value.trim().toLocaleLowerCase('es');
+    const matching = series.filter(s => String(s.titulo || '').toLocaleLowerCase('es').includes(filter));
+    $('seriesCount').textContent = `${series.length} serie${series.length === 1 ? '' : 's'}`;
+    $('seriesCountTab').textContent = `(${series.length})`;
+    if (!matching.length) { emptyList(list, filter ? 'No se encontraron series.' : 'Todavía no hay series. Agrega la primera.'); return; }
+    for (const item of matching) {
+      const cats = Array.isArray(item.categorias) ? item.categorias.join(' · ') : '';
+      const count = seasons.filter(s => String(s.serie_id) === String(item.id)).length;
+      list.append(makeRecord(item.titulo || 'Sin título', `TMDb: ${item.tmdb_id ?? 'sin ID'} · ${cats || 'Sin categoría'} · ${count} temporada${count === 1 ? '' : 's'}`, [
+        ['Editar', () => editSeries(item)],
+        ['Temporadas', () => { switchTab('seasons'); $('seasonSeries').value = String(item.id); $('seasonsTab').scrollIntoView({behavior:'smooth',block:'start'}); }],
+        ['Eliminar', () => deleteSeries(item), 'danger']
+      ]));
+    }
+  }
+  function renderSeasons() {
+    const list = $('seasonsList'); list.replaceChildren();
+    $('seasonsCount').textContent = `${seasons.length} temporada${seasons.length === 1 ? '' : 's'}`;
+    $('seasonsCountTab').textContent = `(${seasons.length})`;
+    if (!seasons.length) { emptyList(list, 'No hay temporadas. Crea primero una serie.'); return; }
+    for (const item of seasons) {
+      const count = episodes.filter(e => String(e.temporada_id) === String(item.id)).length;
+      list.append(makeRecord(`Temporada ${item.numero}${item.titulo ? ' · ' + item.titulo : ''}`, `${seriesName(item.serie_id)} · ${count} episodio${count === 1 ? '' : 's'}`, [
+        ['Editar', () => editSeason(item)],
+        ['Episodios', () => { switchTab('episodes'); $('episodeSeason').value = String(item.id); $('episodesTab').scrollIntoView({behavior:'smooth',block:'start'}); }],
+        ['Eliminar', () => deleteSeason(item), 'danger']
+      ]));
+    }
+  }
+  function renderEpisodes() {
+    const list = $('episodesList'); list.replaceChildren();
+    $('episodesCount').textContent = `${episodes.length} episodio${episodes.length === 1 ? '' : 's'}`;
+    $('episodesCountTab').textContent = `(${episodes.length})`;
+    if (!episodes.length) { emptyList(list, 'No hay episodios. Crea primero una serie y una temporada.'); return; }
+    for (const item of episodes) {
+      list.append(makeRecord(`Episodio ${item.numero}${item.titulo ? ' · ' + item.titulo : ''}`, seasonName(item.temporada_id), [
+        ['Editar', () => editEpisode(item)],
+        ['Eliminar', () => deleteEpisode(item), 'danger']
+      ]));
+    }
+  }
+  function numberValue(id, allowNull = false) {
+    const raw = $(id).value.trim();
+    if (!raw && allowNull) return null;
+    const n = Number(raw);
+    if (!raw || !Number.isSafeInteger(n)) throw new Error('Revisa el número del campo correspondiente.');
+    return n;
+  }
+  function safeHttpUrl(value, name, required = false) {
+    const result = value.trim();
+    if (!result && !required) return '';
+    if (!result) throw new Error('Falta la URL de ' + name + '.');
+    let parsed;
+    try { parsed = new URL(result); } catch (_) { throw new Error('La URL de ' + name + ' no es válida.'); }
+    if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error('La URL de ' + name + ' debe usar HTTP o HTTPS.');
+    return result;
+  }
+  function seriesPayload() {
+    const titulo = $('seriesTitle').value.trim();
+    if (!titulo) throw new Error('Escribe el título de la serie.');
+    const tmdb = numberValue('seriesTmdb', true);
+    if (tmdb !== null && tmdb < 1) throw new Error('El TMDb ID debe ser positivo.');
+    const cats = [...new Set($('seriesCategories').value.split(',').map(s => s.trim()).filter(Boolean))];
+    if (!cats.length) throw new Error('Indica al menos una categoría.');
+    if (!cats.includes('✨ NOVATV')) cats.unshift('✨ NOVATV');
+    return {
+      titulo, tmdb_id: tmdb, categorias: cats,
+      portada: safeHttpUrl($('seriesPoster').value, 'portada'),
+      fondo: safeHttpUrl($('seriesBackdrop').value, 'fondo'),
+      descripcion: $('seriesDescription').value.trim()
+    };
+  }
+  function seasonsPayload() {
+    const serie_id = numberValue('seasonSeries');
+    if (!series.some(s => Number(s.id) === serie_id)) throw new Error('Selecciona una serie existente.');
+    const numero = numberValue('seasonNumber');
+    if (numero < 0) throw new Error('El número de temporada no puede ser negativo.');
+    return { serie_id, numero, titulo: $('seasonTitle').value.trim() };
+  }
+  function episodesPayload() {
+    const temporada_id = numberValue('episodeSeason');
+    if (!seasons.some(s => Number(s.id) === temporada_id)) throw new Error('Selecciona una temporada existente.');
+    const numero = numberValue('episodeNumber');
+    if (numero < 1) throw new Error('El número de episodio debe ser 1 o mayor.');
+    return {
+      temporada_id, numero,
+      titulo: $('episodeTitle').value.trim(),
+      url: safeHttpUrl($('episodeUrl').value, 'vídeo', true),
+      portada: safeHttpUrl($('episodePoster').value, 'imagen'),
+      descripcion: $('episodeDescription').value.trim()
+    };
+  }
+  function hideEpisodeUrl() {
+    $('episodeUrl').type = 'password';
+    $('episodeShowUrl').textContent = 'Mostrar';
+    $('episodeShowUrl').setAttribute('aria-pressed', 'false');
+  }
+  function clearSeries() {
+    editingSeries = null; $('seriesForm').reset(); $('seriesCategories').value = '✨ NOVATV';
+    $('seriesFormTitle').textContent = 'Agregar serie'; $('seriesSave').textContent = 'Agregar serie'; $('seriesCancel').classList.add('hidden');
+  }
+  function clearSeason() {
+    editingSeason = null; $('seasonsForm').reset();
+    $('seasonsFormTitle').textContent = 'Agregar temporada'; $('seasonsSave').textContent = 'Agregar temporada'; $('seasonsCancel').classList.add('hidden');
+  }
+  function clearEpisode() {
+    editingEpisode = null; $('episodesForm').reset(); hideEpisodeUrl();
+    $('episodesFormTitle').textContent = 'Agregar episodio'; $('episodesSave').textContent = 'Agregar episodio'; $('episodesCancel').classList.add('hidden');
+  }
+  function editSeries(item) {
+    if (busy) return;
+    switchTab('series'); editingSeries = String(item.id);
+    $('seriesTitle').value = item.titulo || '';
+    $('seriesTmdb').value = item.tmdb_id ?? '';
+    $('seriesCategories').value = Array.isArray(item.categorias) ? item.categorias.join(', ') : '✨ NOVATV';
+    $('seriesPoster').value = item.portada || '';
+    $('seriesBackdrop').value = item.fondo || '';
+    $('seriesDescription').value = item.descripcion || '';
+    $('seriesFormTitle').textContent = 'Editar serie'; $('seriesSave').textContent = 'Guardar cambios'; $('seriesCancel').classList.remove('hidden');
+    message($('adminStatus'), 'Editando serie: ' + item.titulo); $('seriesForm').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function editSeason(item) {
+    if (busy) return;
+    switchTab('seasons'); editingSeason = String(item.id);
+    $('seasonSeries').value = String(item.serie_id);
+    $('seasonNumber').value = item.numero;
+    $('seasonTitle').value = item.titulo || '';
+    $('seasonsFormTitle').textContent = 'Editar temporada'; $('seasonsSave').textContent = 'Guardar cambios'; $('seasonsCancel').classList.remove('hidden');
+    message($('adminStatus'), 'Editando temporada de ' + seriesName(item.serie_id)); $('seasonsForm').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function editEpisode(item) {
+    if (busy) return;
+    switchTab('episodes'); editingEpisode = String(item.id);
+    $('episodeSeason').value = String(item.temporada_id);
+    $('episodeNumber').value = item.numero;
+    $('episodeTitle').value = item.titulo || '';
+    $('episodeUrl').value = item.url || '';
+    $('episodePoster').value = item.portada || '';
+    $('episodeDescription').value = item.descripcion || '';
+    hideEpisodeUrl();
+    $('episodesFormTitle').textContent = 'Editar episodio'; $('episodesSave').textContent = 'Guardar cambios'; $('episodesCancel').classList.remove('hidden');
+    message($('adminStatus'), 'Editando episodio ' + item.numero + ' de ' + seasonName(item.temporada_id)); $('episodesForm').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  async function saveRecord(event, category) {
+    event.preventDefault(); if (busy) return;
+    message($('adminStatus'), '');
+    const config = {
+      series: { id: editingSeries, payload: seriesPayload, endpoint: ENDPOINTS.series, reset: clearSeries, single: 'Serie' },
+      seasons: { id: editingSeason, payload: seasonsPayload, endpoint: ENDPOINTS.seasons, reset: clearSeason, single: 'Temporada' },
+      episodes: { id: editingEpisode, payload: episodesPayload, endpoint: ENDPOINTS.episodes, reset: clearEpisode, single: 'Episodio' }
+    }[category];
+    let payload;
+    try { payload = config.payload(); } catch (error) { message($('adminStatus'), readableError(error), 'err'); return; }
+    const isEdit = config.id !== null;
+    setBusy(true);
+    try {
+      const url = isEdit ? config.endpoint + '?id=eq.' + encodeURIComponent(config.id) : config.endpoint;
+      const records = await request(url, { method: isEdit ? 'PATCH' : 'POST', body: JSON.stringify(payload) });
+      if (!Array.isArray(records) || records.length !== 1) throw new Error('El servidor no confirmó el cambio. Comprueba los permisos de administración.');
+      config.reset();
+      await loadAll();
+      message($('adminStatus'), `${config.single} ${isEdit ? 'actualizada' : 'agregada'} correctamente.`, 'ok');
+    } catch(error) { message($('adminStatus'), readableError(error), 'err'); }
+    finally { setBusy(false); }
+  }
+  async function deleteRecord(category, item) {
+    if (busy) return;
+    const config = {
+      series: {
+        endpoint: ENDPOINTS.series, label: item.titulo || 'esta serie',
+        warning: 'Esto también ELIMINARÁ TODAS sus temporadas y episodios.', reset: clearSeries,
+        editing: editingSeries, done: 'Serie eliminada.'
+      },
+      seasons: {
+        endpoint: ENDPOINTS.seasons, label: `temporada ${item.numero} de ${seriesName(item.serie_id)}`,
+        warning: 'Esto también ELIMINARÁ TODOS los episodios de esa temporada.', reset: clearSeason,
+        editing: editingSeason, done: 'Temporada eliminada.'
+      },
+      episodes: {
+        endpoint: ENDPOINTS.episodes, label: `episodio ${item.numero} de ${seasonName(item.temporada_id)}`,
+        warning: '', reset: clearEpisode, editing: editingEpisode, done: 'Episodio eliminado.'
+      }
+    }[category];
+    if (!confirm(`¿Eliminar «${config.label}»?\n\n${config.warning}`)) return;
+    setBusy(true);
+    try {
+      const records = await request(config.endpoint + '?id=eq.' + encodeURIComponent(String(item.id)), {
+        method: 'DELETE', headers: { Prefer: 'return=representation' }
+      });
+      if (!Array.isArray(records) || records.length !== 1) throw new Error('El servidor no confirmó la eliminación. Comprueba los permisos.');
+      if (config.editing === String(item.id)) config.reset();
+      await loadAll();
+      message($('adminStatus'), config.done, 'ok');
+    } catch(error) { message($('adminStatus'), readableError(error), 'err'); }
+    finally { setBusy(false); }
+  }
+  const deleteSeries = item => deleteRecord('series', item);
+  const deleteSeason = item => deleteRecord('seasons', item);
+  const deleteEpisode = item => deleteRecord('episodes', item);
+  function logout() {
+    session = null; key = ''; busy = false;
+    series = []; seasons = []; episodes = [];
+    editingSeries = editingSeason = editingEpisode = null;
+    $('loginPanel').classList.remove('hidden'); $('adminPanel').classList.add('hidden');
+    $('email').value = ''; $('password').value = ''; $('apiKey').value = '';
+    $('who').textContent = '';
+    $('seriesList').replaceChildren(); $('seasonsList').replaceChildren(); $('episodesList').replaceChildren();
+    clearSeries(); clearSeason(); clearEpisode();
+    $('seriesSearch').value = '';
+    message($('adminStatus'), ''); message($('loginStatus'), 'Sesión cerrada.', 'ok');
+    switchTab('series');
+  }
+  $('loginForm').addEventListener('submit', login);
+  $('seriesForm').addEventListener('submit', event => saveRecord(event, 'series'));
+  $('seasonsForm').addEventListener('submit', event => saveRecord(event, 'seasons'));
+  $('episodesForm').addEventListener('submit', event => saveRecord(event, 'episodes'));
+  for (const tab of document.querySelectorAll('[data-tab]')) tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  $('seriesCancel').addEventListener('click', () => { clearSeries(); message($('adminStatus'), 'Edición cancelada.'); });
+  $('seasonsCancel').addEventListener('click', () => { clearSeason(); message($('adminStatus'), 'Edición cancelada.'); });
+  $('episodesCancel').addEventListener('click', () => { clearEpisode(); message($('adminStatus'), 'Edición cancelada.'); });
+  $('logoutButton').addEventListener('click', logout);
+  $('seriesSearch').addEventListener('input', renderSeries);
+  $('reloadButton').addEventListener('click', async () => {
+    if (busy) return;
+    setBusy(true);
+    try { await loadAll(); message($('adminStatus'), 'Catálogo actualizado.', 'ok'); }
+    catch(error) { message($('adminStatus'), readableError(error), 'err'); }
+    finally { setBusy(false); }
+  });
+  $('episodeShowUrl').addEventListener('click', () => {
+    const showing = $('episodeUrl').type === 'password';
+    $('episodeUrl').type = showing ? 'url' : 'password';
+    $('episodeShowUrl').textContent = showing ? 'Ocultar' : 'Mostrar';
+    $('episodeShowUrl').setAttribute('aria-pressed', String(showing));
+  });
+  refreshParents();
+})();
+</script>
+</body>
+</html>
