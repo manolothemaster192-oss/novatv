@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>NovaTV · Panel privado de TV</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0e0b14;--panel:#1b1526;--panel2:#241b33;--line:#48345f;--fg:#f6f0ff;--muted:#b8abc9;--accent:#a77bff;--accent2:#7240d9;--danger:#f0829a;--ok:#85dcaa}
+    *{box-sizing:border-box}
+    html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{margin:0;background:radial-gradient(ellipse at top left,#221633 0%,var(--bg) 48%);min-height:100vh;color:var(--fg)}
+    main{max-width:1200px;margin:0 auto;padding:28px 18px 64px}
+    h1,h2,h3,p{margin-top:0}h1{font-size:clamp(26px,4vw,38px);margin-bottom:6px}h2{font-size:21px;margin-bottom:14px}h3{font-size:17px;margin:0}
+    .muted{color:var(--muted)}.lead{margin-bottom:22px}.tag{display:inline-flex;padding:4px 10px;border:1px solid #8662bd;background:#291c3c;border-radius:999px;color:#dccdff;font-size:13px;margin-bottom:12px}
+    .card{border:1px solid var(--line);background:rgba(27,21,38,.96);border-radius:18px;padding:22px;box-shadow:0 10px 32px #0002}
+    .stack{display:grid;gap:15px}.layout{display:grid;grid-template-columns:minmax(320px,.95fr) minmax(380px,1.25fr);gap:20px;align-items:start}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+    label{display:block;font-weight:650;font-size:14px;margin-bottom:6px}
+    .hint{font-size:12px;color:var(--muted);margin-top:5px}.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    input,textarea,select{width:100%;border:1px solid #5b466f;background:#100d17;border-radius:10px;padding:12px 13px;font:inherit;font-size:15px;color:var(--fg);outline:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #a77bff33}
+    input::placeholder,textarea::placeholder{color:#9587a4}textarea{min-height:86px;resize:vertical}input[readonly]{opacity:.72}
+    button{border:1px solid #634882;border-radius:10px;background:var(--panel2);color:var(--fg);padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}
+    button:hover:not(:disabled){border-color:var(--accent);background:#332249}button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}
+    .primary{background:var(--accent2);border-color:#ae86ff}.primary:hover:not(:disabled){background:#8755eb}.danger{color:#ffdce4;border-color:#b75b78}
+    .tiny{font-size:13px;padding:7px 10px}.badge{background:#26382d;color:var(--ok);border-radius:999px;padding:4px 9px;font-size:12px;font-weight:750}
+    .state{border-radius:10px;padding:12px 14px;border:1px solid var(--line);background:#291d3a;margin:12px 0;white-space:pre-wrap;line-height:1.4}
+    .state.ok{background:#152b22;border-color:#3c7d59;color:#adf0c7}.state.err{background:#341c27;border-color:#98485c;color:#ffd6de}
+    .note{border-left:3px solid var(--accent);padding:8px 12px;background:#2b203b;color:#dbcaec;border-radius:5px;font-size:13px}
+    .records{display:grid;gap:10px;max-height:72vh;overflow:auto;padding-right:4px}.record{border:1px solid #4a365e;background:#171120;border-radius:12px;padding:13px}.record:hover{border-color:#7753a3}
+    .record h3{overflow-wrap:anywhere}.record-meta{color:var(--muted);font-size:13px;margin:6px 0 12px;overflow-wrap:anywhere}
+    .hidden{display:none!important}.count{font-size:13px;color:#d5c2f3}.mini{font-size:13px}.urlrow{flex-wrap:nowrap}.urlrow button{white-space:nowrap}
+    .toggle{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid #5b466f;background:#100d17;border-radius:10px}.toggle input{width:auto;margin:0;accent-color:#8b5cf6}
+    .logo-preview{width:54px;height:54px;object-fit:contain;background:#0b0810;border:1px solid #4a365e;border-radius:10px;padding:4px;flex:0 0 auto}
+    .channel-head{display:flex;align-items:center;gap:12px}.status-on{color:#9ff0bd}.status-off{color:#ffb3c2}
+    .spinner{width:14px;height:14px;border:2px solid #aaa2b8;border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:820px){.layout{grid-template-columns:1fr}.records{max-height:none}.fields2{grid-template-columns:1fr}.card{padding:18px}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="tag">✨ NOVATV · ADMINISTRACIÓN</span>
+    <h1>Panel privado de TV</h1>
+    <p class="muted lead">Agrega y administra canales privados de NovaTV desde Supabase, sin modificar los canales Xtream.</p>
+  </header>
+
+  <section id="loginPanel" class="card" style="max-width:620px" aria-labelledby="loginTitle">
+    <h2 id="loginTitle">Acceso de administrador</h2>
+    <p class="muted">Usa la <strong>cuenta administradora</strong> del Panel NovaTV.</p>
+    <form id="loginForm" class="stack">
+      <div><label for="projectUrl">Proyecto Supabase</label><input id="projectUrl" readonly value="https://mktyemnpejqpmollyjiw.supabase.co"></div>
+      <div><label for="apiKey">Publishable Key de Supabase</label><input id="apiKey" type="password" autocomplete="off" spellcheck="false" required placeholder="sb_publishable_..."><div class="hint">Únicamente la Publishable Key. Nunca uses Secret Key ni service_role.</div></div>
+      <div><label for="email">Correo del administrador</label><input id="email" type="email" autocomplete="username" required></div>
+      <div><label for="password">Contraseña del administrador</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <div class="row"><button class="primary" id="loginButton" type="submit">Entrar al panel</button><span id="loginBusy" class="hidden muted"><span class="spinner"></span> Conectando…</span></div>
+    </form>
+    <div id="loginStatus" class="state hidden" role="status" aria-live="polite"></div>
+    <p class="note" style="margin-top:16px;margin-bottom:0">La sesión se mantiene solo mientras esta página permanece abierta.</p>
+  </section>
+
+  <section id="adminPanel" class="hidden">
+    <div class="card row between" style="margin-bottom:16px;padding:15px 20px">
+      <div><strong>Conectado a NovaTV</strong> <span class="badge">Supabase</span><div id="who" class="muted mini" style="margin-top:4px"></div></div>
+      <div class="row"><button id="reloadButton" type="button">↻ Actualizar</button><button id="logoutButton" type="button">Cerrar sesión</button></div>
+    </div>
+
+    <p class="note" style="margin:0 0 16px">Los canales de este panel serán independientes de Xtream. La app Android los integrará después en TV usando LibVLC.</p>
+    <div id="adminStatus" class="state hidden" role="status" aria-live="polite"></div>
+
+    <section class="layout">
+      <div class="card">
+        <h2 id="formTitle">Agregar canal</h2>
+        <form id="channelForm" class="stack">
+          <div><label for="name">Nombre *</label><input id="name" maxlength="200" required placeholder="Nombre del canal"></div>
+          <div><label for="categories">Categorías *</label><input id="categories" required value="✨ NOVATV"><div class="hint">Separa varias categorías con comas.</div></div>
+
+          <div>
+            <label for="url">URL directa del stream *</label>
+            <div class="row urlrow"><input id="url" class="grow" type="password" required autocomplete="off" spellcheck="false" placeholder="https://.../stream.m3u8"><button id="showUrl" type="button" class="tiny" aria-pressed="false">Mostrar</button></div>
+            <div class="hint">Puede ser HLS/M3U8, TS u otra URL directa compatible. Añade solo streams autorizados.</div>
+          </div>
+
+          <div><label for="logo">URL del logo (opcional)</label><input id="logo" type="url" placeholder="https://.../logo.png"></div>
+          <div><label for="epgId">EPG ID (opcional)</label><input id="epgId" maxlength="250" placeholder="Ej.: canal.ejemplo.tv"><div class="hint">Lo usaremos más adelante para asociar programación/EPG.</div></div>
+
+          <label class="toggle" for="active">
+            <input id="active" type="checkbox" checked>
+            <span><strong>Canal activo</strong><br><span class="muted mini">Si lo desactivas, podremos ocultarlo de la app sin eliminarlo.</span></span>
+          </label>
+
+          <div class="row"><button class="primary" id="saveButton" type="submit">Agregar canal</button><button id="cancelButton" class="hidden" type="button">Cancelar edición</button></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="row between" style="margin-bottom:12px"><h2 style="margin:0">Canales del catálogo</h2><span id="count" class="count"></span></div>
+        <input id="search" placeholder="Buscar por nombre o categoría…" style="margin-bottom:14px">
+        <div id="list" class="records"><p class="muted">Cargando…</p></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const PROJECT_URL = 'https://mktyemnpejqpmollyjiw.supabase.co';
+  const ENDPOINT = PROJECT_URL + '/rest/v1/canales_novatv';
+  const $ = (id) => document.getElementById(id);
+
+  let key = '';
+  let session = null;
+  let busy = false;
+  let channels = [];
+  let editingId = null;
+
+  function message(el, text, kind = '') {
+    el.textContent = text;
+    el.className = 'state ' + kind;
+    el.classList.toggle('hidden', !text);
+  }
+
+  function setBusy(value) {
+    busy = value;
+    for (const id of ['loginButton','reloadButton','saveButton']) $(id).disabled = value;
+    $('loginBusy').classList.toggle('hidden', !value || !!session);
+  }
+
+  function readableError(error) {
+    if (error?.status === 401 || error?.status === 403) return 'Acceso denegado o sesión caducada. Usa la cuenta administradora.';
+    if (error?.code === '23505') return 'Ya existe un registro con esos datos.';
+    return error?.message || 'No se pudo completar la solicitud.';
+  }
+
+  async function responseJson(response) {
+    const body = await response.text();
+    let data = null;
+    try { data = body ? JSON.parse(body) : null; } catch (_) {}
+    if (!response.ok) {
+      const error = new Error(data?.message || data?.msg || data?.error_description || data?.error || `Error HTTP ${response.status}`);
+      error.status = response.status;
+      error.code = data?.code;
+      throw error;
+    }
+    return data;
+  }
+
+  async function login(event) {
+    event.preventDefault();
+    if (busy) return;
+    message($('loginStatus'), '');
+    const newKey = $('apiKey').value.trim();
+    if (!newKey.startsWith('sb_publishable_')) {
+      message($('loginStatus'), 'Usa únicamente la Publishable Key de Supabase.', 'err');
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const response = await fetch(PROJECT_URL + '/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        headers: { apikey: newKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('email').value.trim(), password: $('password').value })
+      });
+      const data = await responseJson(response);
+      if (!data?.access_token || !data?.refresh_token) throw new Error('Supabase no devolvió una sesión válida.');
+
+      key = newKey;
+      session = {
+        token: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt: Date.now() + (Number(data.expires_in) || 3600) * 1000,
+        email: data.user?.email || $('email').value.trim()
+      };
+
+      $('password').value = '';
+      $('apiKey').value = '';
+      $('who').textContent = 'Sesión: ' + session.email;
+      $('loginPanel').classList.add('hidden');
+      $('adminPanel').classList.remove('hidden');
+      await loadChannels();
+    } catch (error) {
+      message($('loginStatus'), readableError(error), 'err');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function currentToken() {
+    if (!session) throw new Error('Inicia sesión de nuevo.');
+    if (Date.now() < session.expiresAt - 60000) return session.token;
+
+    const response = await fetch(PROJECT_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { apikey: key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refreshToken })
+    });
+    const data = await responseJson(response);
+    if (!data?.access_token || !data?.refresh_token) throw new Error('No se pudo renovar la sesión. Vuelve a iniciar sesión.');
+
+    session.token = data.access_token;
+    session.refreshToken = data.refresh_token;
+    session.expiresAt = Date.now() + (Number(data.expires_in) || 3600) * 1000;
+    return session.token;
+  }
+
+  async function api(url, options = {}) {
+    const token = await currentToken();
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        apikey: key,
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        Prefer: options.prefer || 'return=representation',
+        ...(options.headers || {})
+      }
+    });
+    return responseJson(response);
+  }
+
+  function categoriesFromInput(value) {
+    const items = value.split(',').map(x => x.trim()).filter(Boolean);
+    return [...new Set(items.length ? items : ['✨ NOVATV'])];
+  }
+
+  function resetForm() {
+    editingId = null;
+    $('formTitle').textContent = 'Agregar canal';
+    $('saveButton').textContent = 'Agregar canal';
+    $('cancelButton').classList.add('hidden');
+    $('channelForm').reset();
+    $('categories').value = '✨ NOVATV';
+    $('active').checked = true;
+    $('url').type = 'password';
+    $('showUrl').textContent = 'Mostrar';
+    $('showUrl').setAttribute('aria-pressed', 'false');
+  }
+
+  function channelPayload() {
+    return {
+      nombre: $('name').value.trim(),
+      categorias: categoriesFromInput($('categories').value),
+      url: $('url').value.trim(),
+      logo: $('logo').value.trim(),
+      epg_id: $('epgId').value.trim(),
+      activo: $('active').checked
+    };
+  }
+
+  function render() {
+    const q = $('search').value.trim().toLowerCase();
+    const filtered = channels.filter(c => {
+      const cats = Array.isArray(c.categorias) ? c.categorias.join(' ') : '';
+      return !q || String(c.nombre || '').toLowerCase().includes(q) || cats.toLowerCase().includes(q);
+    });
+
+    $('count').textContent = `${channels.length} canal${channels.length === 1 ? '' : 'es'}`;
+
+    if (!filtered.length) {
+      $('list').innerHTML = `<p class="muted">${channels.length ? 'No hay coincidencias.' : 'Todavía no hay canales. Agrega el primero.'}</p>`;
+      return;
+    }
+
+    $('list').innerHTML = '';
+    for (const c of filtered) {
+      const article = document.createElement('article');
+      article.className = 'record';
+
+      const head = document.createElement('div');
+      head.className = 'channel-head';
+
+      if (c.logo) {
+        const img = document.createElement('img');
+        img.className = 'logo-preview';
+        img.alt = '';
+        img.referrerPolicy = 'no-referrer';
+        img.src = c.logo;
+        img.onerror = () => img.remove();
+        head.appendChild(img);
+      }
+
+      const info = document.createElement('div');
+      info.className = 'grow';
+      const h3 = document.createElement('h3');
+      h3.textContent = c.nombre || 'Sin nombre';
+      const meta = document.createElement('div');
+      meta.className = 'record-meta';
+      const cats = Array.isArray(c.categorias) ? c.categorias.join(' · ') : '✨ NOVATV';
+      meta.textContent = `${cats} · ${c.activo ? 'Activo' : 'Inactivo'}${c.epg_id ? ' · EPG: ' + c.epg_id : ''}`;
+      info.append(h3, meta);
+      head.appendChild(info);
+
+      const buttons = document.createElement('div');
+      buttons.className = 'row';
+
+      const edit = document.createElement('button');
+      edit.type = 'button';
+      edit.textContent = 'Editar';
+      edit.addEventListener('click', () => startEdit(c));
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'danger';
+      del.textContent = 'Eliminar';
+      del.addEventListener('click', () => removeChannel(c));
+
+      buttons.append(edit, del);
+      article.append(head, buttons);
+      $('list').appendChild(article);
+    }
+  }
+
+  async function loadChannels(force = false, quiet = false) {
+    if (busy && !force) return;
+
+    if (!force) setBusy(true);
+    if (!quiet) message($('adminStatus'), '');
+
+    try {
+      channels = await api(ENDPOINT + '?select=id,created_at,nombre,categorias,url,logo,epg_id,activo&order=created_at.desc&limit=500', {
+        method: 'GET',
+        prefer: 'return=minimal'
+      }) || [];
+      render();
+
+      if (!quiet) {
+        message($('adminStatus'), 'Catálogo actualizado.', 'ok');
+      }
+    } catch (error) {
+      message($('adminStatus'), readableError(error), 'err');
+      throw error;
+    } finally {
+      if (!force) setBusy(false);
+    }
+  }
+
+  function startEdit(c) {
+    editingId = c.id;
+    $('formTitle').textContent = 'Editar canal';
+    $('saveButton').textContent = 'Guardar cambios';
+    $('cancelButton').classList.remove('hidden');
+    $('name').value = c.nombre || '';
+    $('categories').value = Array.isArray(c.categorias) ? c.categorias.join(', ') : '✨ NOVATV';
+    $('url').value = c.url || '';
+    $('logo').value = c.logo || '';
+    $('epgId').value = c.epg_id || '';
+    $('active').checked = c.activo !== false;
+    $('url').type = 'password';
+    $('showUrl').textContent = 'Mostrar';
+    $('showUrl').setAttribute('aria-pressed', 'false');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function saveChannel(event) {
+    event.preventDefault();
+    if (busy) return;
+
+    const payload = channelPayload();
+    if (!payload.nombre || !payload.url) {
+      message($('adminStatus'), 'Completa el nombre y la URL del canal.', 'err');
+      return;
+    }
+
+    setBusy(true);
+    message($('adminStatus'), '');
+    try {
+      const estabaEditando = editingId != null;
+
+      if (!estabaEditando) {
+        await api(ENDPOINT, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { Prefer: 'return=representation' }
+        });
+      } else {
+        await api(ENDPOINT + '?id=eq.' + encodeURIComponent(editingId), {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+          headers: { Prefer: 'return=representation' }
+        });
+      }
+
+      resetForm();
+
+      // Forzar la recarga aun cuando el formulario mantiene busy=true.
+      // En v1, loadChannels() salía antes por "if (busy) return", por eso
+      // el canal se guardaba pero solo aparecía al pulsar Actualizar.
+      await loadChannels(true, true);
+
+      message(
+        $('adminStatus'),
+        estabaEditando ? 'Canal actualizado correctamente.' : 'Canal agregado correctamente.',
+        'ok'
+      );
+    } catch (error) {
+      message($('adminStatus'), readableError(error), 'err');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeChannel(c) {
+    if (busy) return;
+    if (!confirm(`¿Eliminar "${c.nombre}" del catálogo NovaTV?`)) return;
+
+    setBusy(true);
+    message($('adminStatus'), '');
+    try {
+      await api(ENDPOINT + '?id=eq.' + encodeURIComponent(c.id), {
+        method: 'DELETE',
+        headers: { Prefer: 'return=representation' }
+      });
+      if (editingId === c.id) resetForm();
+      await loadChannels(true, true);
+      message($('adminStatus'), 'Canal eliminado correctamente.', 'ok');
+    } catch (error) {
+      message($('adminStatus'), readableError(error), 'err');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function logout() {
+    key = '';
+    session = null;
+    channels = [];
+    resetForm();
+    $('adminPanel').classList.add('hidden');
+    $('loginPanel').classList.remove('hidden');
+    $('email').value = '';
+    $('password').value = '';
+    $('apiKey').value = '';
+    message($('loginStatus'), '');
+    message($('adminStatus'), '');
+  }
+
+  $('loginForm').addEventListener('submit', login);
+  $('channelForm').addEventListener('submit', saveChannel);
+  $('cancelButton').addEventListener('click', resetForm);
+  $('reloadButton').addEventListener('click', () => loadChannels());
+  $('logoutButton').addEventListener('click', logout);
+  $('search').addEventListener('input', render);
+
+  $('showUrl').addEventListener('click', () => {
+    const showing = $('url').type === 'text';
+    $('url').type = showing ? 'password' : 'text';
+    $('showUrl').textContent = showing ? 'Mostrar' : 'Ocultar';
+    $('showUrl').setAttribute('aria-pressed', String(!showing));
+  });
+})();
+</script>
+</body>
+</html>
