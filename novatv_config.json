@@ -1,1 +1,24 @@
-"primary": "https://tvgopremium.net:8443"
+{
+  "configVersion": 1,
+  "xtream": {
+    "primary": "https://tvgopremium.net:8443",
+    "fallbacks": []
+  },
+  "maintenance": {
+    "enabled": false,
+    "title": "Mantenimiento",
+    "message": "Estamos realizando tareas de mantenimiento. Intenta nuevamente en unos minutos.",
+    "maintenanceUntil": "",
+    "allowTv": false,
+    "allowMovies": false,
+    "allowSeries": false
+  },
+  "update": {
+    "versionCode": 1,
+    "versionName": "9.20.1",
+    "apkUrl": "",
+    "sha256": "",
+    "mandatory": false,
+    "message": ""
+  }
+}
