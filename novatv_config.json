@@ -1,11 +1,13 @@
 {
   "configVersion": 2,
   "xtream": {
-    "primary": "https://tvgopremium.net:8443",
-    "fallbacks": []
+    "primary": "https://url-falsa-para-prueba.invalid:8443",
+    "fallbacks": [
+      "https://tvgopremium.net:8443"
+    ]
   },
   "playlistUpdate": {
-    "required": false,
+    "required": true,
     "title": "Actualizar lista de reproducción",
     "message": "El proveedor actualizó su servidor. Ve a Mi Cuenta y pulsa Actualizar lista de reproducción."
   },
