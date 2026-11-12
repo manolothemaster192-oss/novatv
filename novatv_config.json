@@ -1,7 +1,7 @@
 {
   "configVersion": 1,
   "xtream": {
-    "primary": "https://tvgopremium.net:8443",
+    "primary": "https://tvgopremiume.net:8443",
     "fallbacks": []
   },
   "maintenance": {
