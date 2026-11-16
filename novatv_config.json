@@ -20,12 +20,11 @@
     "allowMovies": false,
     "allowSeries": false
   },
-  "update": {
-    "versionCode": 1,
-    "versionName": "9.21.0",
-    "apkUrl": "",
-    "sha256": "",
-    "mandatory": false,
-    "message": ""
-  }
+ "update": {
+  "versionCode": 101,
+  "versionName": "1.0.0-beta2",
+  "apkUrl": "https://github.com/manolothemaster192-oss/novatv/releases/download/v1.0.0-beta2/NovaTV-1.0.0-beta2-armeabi-v7a.apk",
+  "sha256": "AF56DA1404A9A931209ED2CA979C344CB8492C3F9AB814EA214D1F6573570CC1",
+  "mandatory": false,
+  "message": "Nueva versión de NovaTV disponible."}
 }
